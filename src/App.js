@@ -1,24 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import Notes from './components/Notes';
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [showSignup, setShowSignup] = useState(false);
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    setToken('');
+  };
+
+  if (token) {
+    return <Notes token={token} onLogout={logout} />;
+  }
+
+  if (showSignup) {
+    return (
+      <>
+        <Signup onSignup={() => setShowSignup(false)} />
+        <button onClick={() => setShowSignup(false)}>Back to Login</button>
+      </>
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Login onLogin={setToken} />
+      <button onClick={() => setShowSignup(true)}>Sign Up</button>
+    </>
   );
 }
 
