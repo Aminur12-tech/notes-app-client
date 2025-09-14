@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../App.css';
 
 export default function Notes({ token, onLogout }) {
@@ -7,7 +7,7 @@ export default function Notes({ token, onLogout }) {
   const [error, setError] = useState('');
   const [showUpgrade, setShowUpgrade] = useState(false);
 
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     const res = await fetch('/api/notes', {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -18,18 +18,18 @@ export default function Notes({ token, onLogout }) {
     } else if (res.status === 401) {
       onLogout();
     }
-  };
+  }, [token, onLogout]);
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+  }, [fetchNotes]);
 
   const createNote = async () => {
     const res = await fetch('/api/notes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ content: newContent }),
     });
@@ -55,7 +55,7 @@ export default function Notes({ token, onLogout }) {
       <h2>Your Notes</h2>
       <button onClick={onLogout}>Logout</button>
       <ul>
-        {notes.map(note => (
+        {notes.map((note) => (
           <li key={note._id}>
             {note.content}
             <button onClick={() => deleteNote(note._id)}>Delete</button>
@@ -65,11 +65,15 @@ export default function Notes({ token, onLogout }) {
       <textarea
         placeholder="New note content"
         value={newContent}
-        onChange={e => setNewContent(e.target.value)}
+        onChange={(e) => setNewContent(e.target.value)}
       />
       <button onClick={createNote}>Add Note</button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {showUpgrade && <p><strong>Upgrade to Pro to add unlimited notes.</strong></p>}
+      {showUpgrade && (
+        <p>
+          <strong>Upgrade to Pro to add unlimited notes.</strong>
+        </p>
+      )}
     </div>
   );
 }
